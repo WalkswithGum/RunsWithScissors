@@ -31,7 +31,7 @@ def parse(String description) {
     def text = descMap.value
     //log.debug "text: $text"
 		if (descMap.clusterInt == 0) {
-            
+            //  Example: Arduino sends messages in 'L_51' format for LUX or 'K_4500' for color temp.
             if (text.startsWith("L_")){
                 valL = text.substring(2,text.indexOf("."))
                 valL = valL.toBigDecimal()
@@ -46,7 +46,7 @@ def parse(String description) {
                colorTemperature = ((valK * 225) + 2000).toBigDecimal()
                level = state.lastL // Retrieve 'Level'.
                log.debug "Color Temp: $colorTemperature K"
-                 
+                // Once it has a K sent, go change the Skylight's lux/CT
                setColorTemperature(colorTemperature,level,tt)
             }
 		}
@@ -57,10 +57,7 @@ def setLevel(value,rate) {
     def scaledRate = (rate * 10).toInteger()
     def cmd = []
     value = (value.toInteger() * 2.55).toInteger() // Makes 'value' 2 - 255.
-       
-    // he raw $deviceNetworkId $sourceEndpointId $deviceEndpointId $clusterId { $frameControl $mfrCode $transactionSequenceNo $commandId 
-    // $commandPayload } { $profileId }
-    
+           
     cmd = [
            "he cmd 0x${devID} 0x${devEND} 0x0008 4 {0x${intTo8bitUnsignedHex(value)} 0x${intTo16bitUnsignedHex(scaledRate)}}",
            "delay ${(rate * 1000) + 400}",
