@@ -30,27 +30,27 @@ def parse(String description) {
     def name
     def text = descMap.value
     //log.debug "text: $text"
-		if (descMap.clusterInt == 0) {
-            //  Example: Arduino sends messages in 'L_51' format for LUX or 'K_4500' for color temp.
-            if (text.startsWith("L_")){
-                valL = text.substring(2,text.indexOf("."))
-                valL = valL.toBigDecimal()
-                level = ((valL * 5) + 1).toBigDecimal()
-                state.lastL = level // Store 'level'.
-                log.debug "Level: $level%" 
-            }
+	if (descMap.clusterInt == 0) {
+         //  Example: Arduino sends messages in 'L_51' format for LUX or 'K_4500' for color temp.
+        if (text.startsWith("L_")){
+            valL = text.substring(2,text.indexOf("."))
+            valL = valL.toBigDecimal()
+            level = ((valL * 5) + 1).toBigDecimal()
+            state.lastL = level // Store 'level'.
+            log.debug "Level: $level%" 
+        }
             
-             if (text.startsWith("K_")){
-               valK = text.substring(2,text.indexOf("."))
-               valK = valK.toBigDecimal()
-               colorTemperature = ((valK * 225) + 2000).toBigDecimal()
-               level = state.lastL // Retrieve 'Level'.
-               log.debug "Color Temp: $colorTemperature K"
-                // Once it has a K sent, go change the Skylight's lux/CT
-               setColorTemperature(colorTemperature,level,tt)
-            }
-		}
+        if (text.startsWith("K_")){
+            valK = text.substring(2,text.indexOf("."))
+            valK = valK.toBigDecimal()
+            colorTemperature = ((valK * 225) + 2000).toBigDecimal()
+            level = state.lastL // Retrieve 'Level'.
+            log.debug "Color Temp: $colorTemperature K"
+            // Once it has a K sent, go change the Skylight's lux/CT
+            setColorTemperature(colorTemperature,level,tt)
+        }
 	}
+}
 
 def setLevel(value,rate) { 
     rate = rate.toBigDecimal()
@@ -59,12 +59,12 @@ def setLevel(value,rate) {
     value = (value.toInteger() * 2.55).toInteger() // Makes 'value' 2 - 255.
            
     cmd = [
-           "he cmd 0x${devID} 0x${devEND} 0x0008 4 {0x${intTo8bitUnsignedHex(value)} 0x${intTo16bitUnsignedHex(scaledRate)}}",
-           "delay ${(rate * 1000) + 400}",
-           "he rattr 0x${devID} 0x${devEND} 0x0008 0 {}"
+        "he cmd 0x${devID} 0x${devEND} 0x0008 4 {0x${intTo8bitUnsignedHex(value)} 0x${intTo16bitUnsignedHex(scaledRate)}}",
+        "delay ${(rate * 1000) + 400}",
+        "he rattr 0x${devID} 0x${devEND} 0x0008 0 {}"
         ]
        return cmd
-    }
+}
 
 List<String> setColorTemperature(colorTemperature, level = null, tt = null) {
     
@@ -86,7 +86,7 @@ List<String> setColorTemperature(colorTemperature, level = null, tt = null) {
         cmds.addAll(zigbee.readAttribute(0x0300,0x0007,[:],0))
     
        return cmds
-    }
+}
  
 
 def intTo16bitUnsignedHex(value) {
@@ -102,8 +102,8 @@ def on() {
     if (logEnable) log.debug "on()"
     def cmd = [
         "he cmd 0x${devID} 0x${devEND} 0x0006 1 {}",
-            "delay 1000",
-            "he rattr 0x${devID} 0x${devEND} 0x0006 0 {}"
+        "delay 1000",
+        "he rattr 0x${devID} 0x${devEND} 0x0006 0 {}"
     ]
     return cmd
 }
@@ -111,9 +111,9 @@ def on() {
 def off() {
     if (logEnable) log.debug "off()"
     def cmd = [
-            "he cmd 0x${devID} 0x${devEND} 0x0006 0 {}",
-            "delay 1000",
-            "he rattr 0x${devID} 0x${devEND} 0x0006 0 {}"
+        "he cmd 0x${devID} 0x${devEND} 0x0006 0 {}",
+        "delay 1000",
+        "he rattr 0x${devID} 0x${devEND} 0x0006 0 {}"
     ]
     return cmd
 }
