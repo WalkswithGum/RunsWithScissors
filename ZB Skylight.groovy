@@ -3,22 +3,22 @@ import groovy.transform.Field
 metadata {
 	definition (name: "ZB", namespace: "hubitat", author: "Andy Haas", ocfDeviceType: "oic.d.switch", runLocally: true, minHubCoreVersion: '000.019.00012', executeCommandsLocally: true, genericHandler: "Zigbee") {
        
-        capability "Color Temperature"
-        capability "Switch"
-        //for battery powered MonaLisa
-        command "pwrwait", ["string"]
-        command "getpwrwait"
-        command "push"      
+    capability "Color Temperature"
+    capability "Switch"
+    //  For battery powered MonaLisa
+    command "pwrwait", ["string"]
+    command "getpwrwait"
+    command "push"      
 
-        fingerprint inClusters: "0000,0003,0004,0005,0006,1000,0008,0300,EF00", outClusters: "0000", profileId: "0104", manufacturer: "TexasInstruments", model: "TI0001", deviceJoinName: "HaasTI Thing"
+    fingerprint inClusters: "0000,0003,0004,0005,0006,1000,0008,0300,EF00", outClusters: "0000", profileId: "0104", manufacturer: "TexasInstruments", model: "TI0001", deviceJoinName: "HaasTI Thing"
 	}
 }
 
-@Field String devID = "B55C"  // Skylight device ID.
-@Field String devEND = "01"   // Skylight device endpoint.
-@Field colorTemperature = 6000
-@Field level = 1
-@Field tt = 1
+@Field String devID = "B55C"      //  Skylight device ID.
+@Field String devEND = "01"       //  Skylight device endpoint.
+@Field colorTemperature = 6000    //  Initial SL CT (K).
+@Field level = 1                  //  Initial SL light level 1-100 (%).
+@Field tt = 1                     //  Initial SL Transition Time (seconds).
 
 def parse(String description) {
     Map map = [:]
@@ -31,12 +31,12 @@ def parse(String description) {
     def text = descMap.value
     //log.debug "text: $text"
 	if (descMap.clusterInt == 0) {
-         //  Example: Arduino sends messages in 'L_51' format for LUX or 'K_4500' for color temp.
+        //  Example: Arduino sends messages in 'L_51.' format for Light Level (51%) or 'K_4500.' for Color Temp (4500K).
         if (text.startsWith("L_")){
             valL = text.substring(2,text.indexOf("."))
             valL = valL.toBigDecimal()
             level = ((valL * 5) + 1).toBigDecimal()
-            state.lastL = level // Store 'level'.
+            state.lastL = level  //  Store 'level'.
             log.debug "Level: $level%" 
         }
             
@@ -44,9 +44,9 @@ def parse(String description) {
             valK = text.substring(2,text.indexOf("."))
             valK = valK.toBigDecimal()
             colorTemperature = ((valK * 225) + 2000).toBigDecimal()
-            level = state.lastL // Retrieve 'Level'.
+            level = state.lastL  //  Retrieve 'level'.
             log.debug "Color Temp: $colorTemperature K"
-            // Once it has a K sent, go change the Skylight's lux/CT
+            //  Once it receives a K, go change the Skylight's Level/CT
             setColorTemperature(colorTemperature,level,tt)
         }
 	}
@@ -56,7 +56,7 @@ def setLevel(value,rate) {
     rate = rate.toBigDecimal()
     def scaledRate = (rate * 10).toInteger()
     def cmd = []
-    value = (value.toInteger() * 2.55).toInteger() // Makes 'value' 2 - 255.
+    value = (value.toInteger() * 2.55).toInteger() //  Makes 'value' 2 - 255.
            
     cmd = [
         "he cmd 0x${devID} 0x${devEND} 0x0008 4 {0x${intTo8bitUnsignedHex(value)} 0x${intTo16bitUnsignedHex(scaledRate)}}",
@@ -79,13 +79,13 @@ List<String> setColorTemperature(colorTemperature, level = null, tt = null) {
         cmds.add("delay ${(ttSeconds + 1) * 1000}")
         cmds.addAll(zigbee.readAttribute(0x0008, 0x0000, [:],300))
         
-        String hexTransition = zigbee.swapOctets(intToHexStr( (ttSeconds * 10).toInteger() ,2)) //this is in deca seconds
+    String hexTransition = zigbee.swapOctets(intToHexStr( (ttSeconds * 10).toInteger() ,2)) //this is in deca seconds
         
         cmds.add("he cmd 0x${devID} 0x${devEND} 0x0300 0x0A { ${hexValue} ${hexTransition}}")
         cmds.add("delay ${(ttSeconds + 1) * 1000}")
         cmds.addAll(zigbee.readAttribute(0x0300,0x0007,[:],0))
     
-       return cmds
+    return cmds
 }
  
 
