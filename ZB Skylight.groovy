@@ -1,20 +1,19 @@
 import groovy.transform.Field
 
 metadata {
-	definition (name: "ZB", namespace: "hubitat", author: "Andy Haas", ocfDeviceType: "oic.d.switch", runLocally: true, minHubCoreVersion: '000.019.00012', executeCommandsLocally: true, genericHandler: "Zigbee") {
+	definition (name: "HaasTI ZigBee Switch", namespace: "hubitat", author: "Andy Haas", ocfDeviceType: "oic.d.switch", runLocally: true, minHubCoreVersion: '000.019.00012', executeCommandsLocally: true, genericHandler: "Zigbee") {
        
     capability "Color Temperature"
     capability "Switch"
     //  For battery powered MonaLisa
     command "pwrwait", ["string"]
-    command "getpwrwait"
-    command "push"      
+    command "getpwrwait"    
 
     fingerprint inClusters: "0000,0003,0004,0005,0006,1000,0008,0300,EF00", outClusters: "0000", profileId: "0104", manufacturer: "TexasInstruments", model: "TI0001", deviceJoinName: "HaasTI Thing"
 	}
 }
 
-@Field String devID = "B55C"      //  Skylight device ID.
+@Field String devID = "ADF5"      //  Skylight device ID.
 @Field String devEND = "01"       //  Skylight device endpoint.
 @Field colorTemperature = 6000    //  Initial SL CT (K).
 @Field level = 1                  //  Initial SL light level 1-100 (%).
@@ -29,7 +28,7 @@ def parse(String description) {
     def value
     def name
     def text = descMap.value
-    //log.debug "text: $text"
+    log.debug "text: $text"
 	if (descMap.clusterInt == 0) {
         //  Example: Arduino sends messages in 'L_51.' format for Light Level (51%) or 'K_4500.' for Color Temp (4500K).
         if (text.startsWith("L_")){
@@ -63,6 +62,7 @@ def setLevel(value,rate) {
         "delay ${(rate * 1000) + 400}",
         "he rattr 0x${devID} 0x${devEND} 0x0008 0 {}"
         ]
+       log.debug "setLevel done"
        return cmd
 }
 
@@ -84,18 +84,22 @@ List<String> setColorTemperature(colorTemperature, level = null, tt = null) {
         cmds.add("he cmd 0x${devID} 0x${devEND} 0x0300 0x0A { ${hexValue} ${hexTransition}}")
         cmds.add("delay ${(ttSeconds + 1) * 1000}")
         cmds.addAll(zigbee.readAttribute(0x0300,0x0007,[:],0))
-    
+    log.debug "setColorTemp done"
     return cmds
 }
  
 
 def intTo16bitUnsignedHex(value) {
     def hexStr = zigbee.convertToHexString(value.toInteger(),4)
+    log.debug "16 bit middle"
     return new String(hexStr.substring(2, 4) + hexStr.substring(0, 2))
+    
 }
 
 def intTo8bitUnsignedHex(value) {
+    log.debug "8 bit start"
     return zigbee.convertToHexString(value.toInteger(), 2)
+    
 }
 
 def on() {
