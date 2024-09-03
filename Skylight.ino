@@ -71,5 +71,176 @@ void loop() {
 
   printToSerial();
   Serial.flush();  // Complete the serial print before going to sleep.
-  // 
-toHUBlux();Serial()){}
+  // Add comparision of old and new readings to avoid sending duplicate commands for no reason.
+  toHUBlux();
+  delay(500);  // Debug...
+  toHUBk();
+ // testOne();
+
+  gotoSLEEP();
+}
+
+
+void testOne() {
+mySerial.write("123456789012345.");
+delay(1000);
+}
+
+void printToSerial() {  // Prints out the actual LUX and K data to Serial.
+  Serial.print("Sensor: ");
+  Serial.print(sensorK);
+  Serial.print("K / ");
+  Serial.print(sensorLUX);
+  Serial.print("Lx      Skylight K: ");
+  Serial.print(setK);
+  Serial.print("  Level %: ");
+  Serial.print(setLUX);
+  Serial.print("      rndK: ");
+  Serial.print(rndK);
+  Serial.print("   rndLUX: ");
+  Serial.println(rndLUX);
+}
+
+void toHUBlux() {  // Send LUX data to HUB.
+  switch (rndLUX) {
+    case 1:
+      mySerial.write("L_1.");
+      break;
+    case 2:
+      mySerial.write("L_2.");
+      break;
+    case 3:
+      mySerial.write("L_3.");
+      break;
+    case 4:
+      mySerial.write("L_4.");
+      break;
+    case 5:
+      mySerial.write("L_5.");
+      break;
+    case 6:
+      mySerial.write("L_6.");
+      break;
+    case 7:
+      mySerial.write("L_7.");
+      break;
+    case 8:
+      mySerial.write("L_8.");
+      break;
+    case 9:
+      mySerial.write("L_9.");
+      break;
+    case 10:
+      mySerial.write("L_10.");
+      break;
+    case 11:
+      mySerial.write("L_11.");
+      break;
+    case 12:
+      mySerial.write("L_12.");
+      break;
+    case 13:
+      mySerial.write("L_13.");
+      break;
+    case 14:
+      mySerial.write("L_14.");
+      break;
+    case 15:
+      mySerial.write("L_15.");
+      break;
+    case 16:
+      mySerial.write("L_16.");
+      break;
+    case 17:
+      mySerial.write("L_17.");
+      break;
+    case 18:
+      mySerial.write("L_18.");
+      break;
+    case 19:
+      mySerial.write("L_19.");
+      break;
+    case 20:
+      mySerial.write("L_20.");
+      break;
+    default:
+      break;
+  }
+}
+
+void toHUBk() {  // Send K data to HUB.
+  switch (rndK) {
+    case 1:
+      mySerial.write("K_1.");
+      break;
+    case 2:
+      mySerial.write("K_2.");
+      break;
+    case 3:
+      mySerial.write("K_3.");
+      break;
+    case 4:
+      mySerial.write("K_4.");
+      break;
+    case 5:
+      mySerial.write("K_5.");
+      break;
+    case 6:
+      mySerial.write("K_6.");
+      break;
+    case 7:
+      mySerial.write("K_7.");
+      break;
+    case 8:
+      mySerial.write("K_8.");
+      break;
+    case 9:
+      mySerial.write("K_9.");
+      break;
+    case 10:
+      mySerial.write("K_10.");
+      break;
+    case 11:
+      mySerial.write("K_11.");
+      break;
+    case 12:
+      mySerial.write("K_12.");
+      break;
+    case 13:
+      mySerial.write("K_13.");
+      break;
+    case 14:
+      mySerial.write("K_14.");
+      break;
+    case 15:
+      mySerial.write("K_15.");
+      break;
+    case 16:
+      mySerial.write("K_16.");
+      break;
+    case 17:
+      mySerial.write("K_17.");
+      break;
+    case 18:
+      mySerial.write("K_18.");
+      break;
+    case 19:
+      mySerial.write("K_19.");
+      break;
+    case 20:
+      mySerial.write("K_20.");
+      break;
+    default:
+      break;
+  }
+}
+
+void gotoSLEEP() {
+  LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  //  8s
+  //LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  //  16s
+  // LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  //  24s
+  //LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);  //  32s
+  //LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);   //  40s
+  //LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);   //  48s
+  //LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);   //  56s
+}
